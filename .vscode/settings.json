@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "iostream": "cpp",
+        "type_traits": "cpp",
+        "cmath": "cpp",
+        "string": "cpp",
+        "functional": "cpp"
+    }
+}
