@@ -4,6 +4,8 @@
         "type_traits": "cpp",
         "cmath": "cpp",
         "string": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "iterator": "cpp",
+        "xutility": "cpp"
     }
 }
