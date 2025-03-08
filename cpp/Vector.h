@@ -15,13 +15,28 @@ template <class Lhs, class Rhs>
 using multiplication_type = decltype(std::declval<Lhs>() * std::declval<Rhs>());
 
 template <class Lhs, class Rhs>
+using multiplication_equal_type = decltype(std::declval<Lhs>() *= std::declval<Rhs>());
+
+
+template <class Lhs, class Rhs>
 using division_type = decltype(std::declval<Lhs>() / std::declval<Rhs>());
+
+template <class Lhs, class Rhs>
+using division_equal_type = decltype(std::declval<Lhs>() /= std::declval<Rhs>());
+
 
 template <class Lhs, class Rhs>
 using addition_type = decltype(std::declval<Lhs>() + std::declval<Rhs>());
 
 template <class Lhs, class Rhs>
+using addition_equal_type = decltype(std::declval<Lhs>() += std::declval<Rhs>());
+
+
+template <class Lhs, class Rhs>
 using substraction_type = decltype(std::declval<Lhs>() - std::declval<Rhs>());
+
+template <class Lhs, class Rhs>
+using substraction_equal_type = decltype(std::declval<Lhs>() -= std::declval<Rhs>());
 
 
 //
@@ -32,13 +47,30 @@ template <class Lhs, class Rhs>
 constexpr bool can_multiply = is_detected<multiplication_type, Lhs, Rhs>::value;
 
 template <class Lhs, class Rhs>
+constexpr bool can_multiply_equal = is_detected<multiplication_equal_type, Lhs, Rhs>::value;
+
+
+template <class Lhs, class Rhs>
 constexpr bool can_divide = is_detected<division_type, Lhs, Rhs>::value;
+
+template <class Lhs, class Rhs>
+constexpr bool can_divide_equal = is_detected<division_equal_type, Lhs, Rhs>::value;
+
 
 template <class Lhs, class Rhs>
 constexpr bool can_add = is_detected<addition_type Lhs, Rhs>::value;
 
 template <class Lhs, class Rhs>
+constexpr bool can_add_equal = is_detected<addition_equal_type Lhs, Rhs>::value;
+
+
+template <class Lhs, class Rhs>
 constexpr bool can_substract = is_detected<substraction_type, Lhs, Rhs>::value;
+
+template <class Lhs, class Rhs>
+constexpr bool can_substract_equal = is_detected<substraction_equam_type, Lhs, Rhs>::value;
+
+
 
 //////////////////////////////////////////////////
 //////////////////   Vector 2   //////////////////
@@ -66,6 +98,11 @@ struct Vec2 {
         if(!can_multiply<T, T>)
         {
             throw "Error, impossible multiplication\n";
+        }
+
+        if(!can_add<multiplication_type<T, T>, multiplication_type<T, T>>)
+        {
+            throw "Error, impossible addition\n";
         }
 
         return sqrt(x*x + y*y);
@@ -96,10 +133,8 @@ struct Vec2 {
             return *this;
         }
 
-        if(!can_divide<T, double>)
-        {
+        if(!can_divide_equal<T, double>)
             throw "Error, impossible division\n";
-        }
 
         x /= magnitude;
         y /= magnitude;
@@ -127,16 +162,11 @@ struct Vec2 {
             throw "Error, impossible addition\n";
         }
 
-        return Vec2<addition_type<T, Ty>>(x + other.x, y + other.y)
+        return Vec2<addition_type<T, Ty>>(x + other.x, y + other.y);
     }
 
-    friend Vec2&& operator+(const Vec2& v1, const Vec2& v2);
-
-    template<typename Lhs, typename Rhs>
-    friend Vec2<addition_type<Lhs, Rhs>>&& operator+(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
-
     void operator+=(const Vec2& other) {
-        if(!can_add<T, T>)
+        if(!can_add_equal<T, T>)
         {
             throw "Error, impossible addition\n";
         }
@@ -158,13 +188,8 @@ struct Vec2 {
         return Vec2<substraction_type<T, Ty>>(x - other.x, y - other.y);
     }
 
-    friend Vec2&& operator-(const Vec2& v1, const Vec2& v2);
-
-    template<typename Lhs, typename Rhs>
-    friend Vec2<substraction_type<Lhs, Rhs>>&& operator-(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
-
     void operator-=(const Vec2& other) {
-        if(!can_substract<T, T>)
+        if(!can_substract_equal<T, T>)
         {
             throw "Error, impossible substraction\n";
         }
@@ -177,21 +202,19 @@ struct Vec2 {
 
     /////////// scalar multiplication
 
-    Vec2&& operator*(double f)
+    Vec2<multiplication_type<T, double>>&& operator*(double f) const
     {
         if(!can_multiply<double, T>)
         {
             throw "Error, impossible multiplication\n";
         }
 
-        return Vec2(f * x, f * y);
+        return Vec2<multiplication_type<T, double>>(x * f, y * f);
     }
-
-    friend Vec2&& operator*(double f, const Vec2& v);
 
     void operator*=(double f)
     {
-        if(!can_multiply<T, double>)
+        if(!can_multiply_equal<T, double>)
         {
             throw "Error, impossible multiplication\n";
         }
@@ -203,24 +226,19 @@ struct Vec2 {
     /////////// vector-vector multiplication (component-wise)
 
     template <typename Ty>
-    Vec2<multiplication_type<T, Ty>>&& operator*(const Vec<Ty>& other)
+    Vec2<multiplication_type<T, Ty>>&& operator*(const Vec2<Ty>& other) const
     {
         if(!can_multiply<T, Ty>)
         {
             throw "Error, impossible multiplication\n";
         }
-        return Vec2(x * other.x, y * other.y);
+        return Vec2<multiplication_type<T, Ty>>(x * other.x, y * other.y);
     }
-
-    friend Vec2&& operator*(const Vec2& v1, const Vec2& v2);
-
-    template<typename Lhs, typename Rhs>
-    friend Vec2<multiplication_type<Lhs, Rhs>>&& operator*(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
 
     template<typename Ty>
     void operator*=(const Vec2<Ty>& v)
     {
-        if(!can_multiply<T, Ty>)
+        if(!can_multiply_equal<T, Ty>)
         {
             throw "Error, impossible multiplication\n";
         }
@@ -233,7 +251,7 @@ struct Vec2 {
 
     /////////// scalar division
 
-    Vec2&& operator/(double f)
+    Vec2<division_type<T, double>>&& operator/(double f) const
     {
         if(!can_divide<T, double>)
         {
@@ -245,12 +263,12 @@ struct Vec2 {
             throw "Division by zero\n";
         }
 
-        return Vec2(x / f, y / f);
+        return Vec2<division_type<T, double>>(x / f, y / f);
     }
 
     void operator/=(double f)
     {
-        if(!can_divide<T, double>)
+        if(!can_divide_equal<T, double>)
         {
             throw "Error, impossible division\n";
         }
@@ -267,7 +285,7 @@ struct Vec2 {
     /////////// vector-vector division (component-wise)
 
     template <typename Ty>
-    Vec2<division_type<T, Ty>>&& operator*(const Vec<Ty>& other)
+    Vec2<division_type<T, Ty>>&& operator/(const Vec2<Ty>& other) const
     {
         if(!can_divide<T, Ty>)
         {
@@ -279,18 +297,13 @@ struct Vec2 {
             throw "Division by zero\n";
         }
 
-        return Vec2(x / other.x, y / other.y);
+        return Vec2<division_type<T, Ty>>(x / other.x, y / other.y);
     }
-
-    friend Vec2&& operator/(const Vec2& v1, const Vec2& v2);
-
-    template<typename Lhs, typename Rhs>
-    friend Vec2<division_type<Lhs, Rhs>>&& operator/(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
 
     template<typename Ty>
     void operator/=(const Vec2<Ty>& v)
     {
-        if(!can_multiply<T, Ty>)
+        if(!can_divide_equal<T, Ty>)
         {
             throw "Error, impossible multiplication\n";
         }
@@ -346,6 +359,11 @@ struct Vec3 {
 
     double Magnitude() const
     {
+        if(!can_multiply<T, T>)
+            throw "Error, impossible multiplication\n";
+        if(!can_add<multiplication_type<T, T>, multiplication_type<T, T>>)
+            throw "Error, impossible addition\n";
+
         return sqrt(x*x + y*y + z*z);
     }
 
@@ -358,6 +376,9 @@ struct Vec3 {
             return *this;
         }
 
+        if(!can_divide<T, double>)
+            throw "Error, impossible division\n";
+
         return Vec3(x/magnitude, y/magnitude, z/magnitude);
     }
 
@@ -369,6 +390,9 @@ struct Vec3 {
             return *this;
         }
 
+        if(!can_divide_equal<T, double>)
+            throw "Error, impossible division\n";
+
         x /= magnitude;
         y /= magnitude;
         z /= magnitude;
@@ -379,12 +403,22 @@ struct Vec3 {
 
     /////////// add operators
 
-    Vec3&& operator+(const Vec3& other) const { return Vec3(x + other.x, y + other.y, z + other.z); }
+    template <typename Ty>
+    Vec3<addition_type<T, Ty>>&& operator+(const Vec3<Ty>& other) const
+    {
+        if(!can_add<T, Ty>)
+        {
+            throw "Error, impossible addition\n";
+        }
 
-    template<typename Ty>
-    friend Vec3<Ty>&& operator+(const Vec3<Ty>& v1, const Vec3<Ty>& v2);
+        return Vec3<addition_type<T, Ty>>(x + other.x, y + other.y, z + other.z);
+    }
 
     void operator+=(const Vec3& other) {
+        if(!can_add_equal<T, T>)
+        {
+            throw "Error, impossible addition\n";
+        }
         x += other.x;
         y += other.y;
         z += other.z;
@@ -394,27 +428,149 @@ struct Vec3 {
 
     /////////// substract operator
 
-    Vec3&& operator-(const Vec3& other) const { return Vec3(x - other.x, y - other.y); }
-
-    template<typename Ty>
-    friend Vec3<Ty>&& operator-(const Vec3<Ty>& v1, const Vec3<Ty>& v2);
+    template <typename Ty>
+    Vec3<substraction_type<T, Ty>>&& operator-(const Vec3<Ty>& other) const
+    {
+        if(!can_substract<T, Ty>)
+        {
+            throw "Error, impossible substraction\n";
+        }
+        return Vec3<substraction_type<T, Ty>>(x - other.x, y - other.y, z - other.z);
+    }
 
     void operator-=(const Vec3& other) {
+        if(!can_substract_equal<T, T>)
+        {
+            throw "Error, impossible substraction\n";
+        }
+
         x -= other.x;
         y -= other.y;
         z -= other.z;
     }
 
+
+
     /////////// scalar multiplication
 
-    Vec3&& operator*(double f)
+    Vec3<multiplication_type<T, double>>&& operator*(double f) const
     {
-        return Vec3(f * x, f * y, f * z);
+        if(!can_multiply<double, T>)
+        {
+            throw "Error, impossible multiplication\n";
+        }
+
+        return Vec3<multiplication_type<T, double>>(x * f, y * f, z * f);
     }
 
-    /////////// vector-vector multiplication
+    void operator*=(double f)
+    {
+        if(!can_multiply_equal<T, double>)
+        {
+            throw "Error, impossible multiplication\n";
+        }
+
+        x *= f;
+        y *= f;
+        z *= f;
+    }
+
+    /////////// vector-vector multiplication (component-wise)
+
+    template <typename Ty>
+    Vec3<multiplication_type<T, Ty>>&& operator*(const Vec3<Ty>& other) const
+    {
+        if(!can_multiply<T, Ty>)
+        {
+            throw "Error, impossible multiplication\n";
+        }
+        return Vec3<multiplication_type<T, Ty>>(x * other.x, y * other.y, z * other.z);
+    }
+
+    template<typename Ty>
+    void operator*=(const Vec3<Ty>& v)
+    {
+        if(!can_multiply_equal<T, Ty>)
+        {
+            throw "Error, impossible multiplication\n";
+        }
+
+        x *= v.x;
+        y *= v.y;
+        z *= v.z;
+    }
 
 
+
+    /////////// scalar division
+
+    Vec3<division_type<T, double>>&& operator/(double f) const
+    {
+        if(!can_divide<T, double>)
+        {
+            throw "Error, impossible division\n";
+        }
+
+        if(f == 0)
+        {
+            throw "Division by zero\n";
+        }
+
+        return Vec3<division_type<T, double>>(x / f, y / f, z / f);
+    }
+
+    void operator/=(double f)
+    {
+        if(!can_divide<T, double>)
+        {
+            throw "Error, impossible division\n";
+        }
+
+        if(f == 0)
+        {
+            throw "Division by zero\n";
+        }
+
+        x /= f;
+        y /= f;
+        z /= f;
+    }
+
+    /////////// vector-vector division (component-wise)
+
+    template <typename Ty>
+    Vec3<division_type<T, Ty>>&& operator*(const Vec3<Ty>& other) const
+    {
+        if(!can_divide<T, Ty>)
+        {
+            throw "Error, impossible multiplication\n";
+        }
+
+        if(other.x == 0 || other.y == 0)
+        {
+            throw "Division by zero\n";
+        }
+
+        return Vec3<division_type<T, Ty>>(x / other.x, y / other.y, z / other.z);
+    }
+
+    template<typename Ty>
+    void operator/=(const Vec3<Ty>& v)
+    {
+        if(!can_multiply<T, Ty>)
+        {
+            throw "Error, impossible multiplication\n";
+        }
+
+        if(v.x == 0 || v.y == 0)
+        {
+            throw "Division by zero\n";
+        }
+
+        x /= v.x;
+        y /= v.y;
+        z /= v.z;
+    }
 };
 
 
@@ -431,17 +587,6 @@ struct Vec3 {
 
 // additions
 
-template<typename T>
-Vec2<T>&& operator+(const Vec2<T>& v1, const Vec2<T>& v2)
-{
-    if(!can_add<T, T>)
-    {
-        throw "Error, impossible addition\n";
-    }
-
-    return Vec2<T>(v1.x + v2.x, v1.y + v2.y);
-}
-
 template<typename Lhs, typename Rhs>
 Vec2<addition_type<Lhs, Rhs>>&& operator+(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
 {
@@ -456,17 +601,7 @@ Vec2<addition_type<Lhs, Rhs>>&& operator+(const Vec2<Lhs>& v1, const Vec2<Rhs>& 
 
 
 
-// substractions
-
-template<typename T>
-Vec2<T>&& operator-(const Vec2<T>& v1, const Vec2<T>& v2)
-{
-    if(!can_substract<T, T>)
-    {
-        throw "Error, impossible substraction\n";
-    }
-    return Vec2<T>(v1.x - v2.x, v1.y - v2.y);
-}
+// substraction
 
 template<typename Lhs, typename Rhs>
 Vec2<substraction_type<Lhs, Rhs>>&& operator-(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
@@ -484,9 +619,14 @@ Vec2<substraction_type<Lhs, Rhs>>&& operator-(const Vec2<Lhs>& v1, const Vec2<Rh
 // multiplications
 
 template <typename T>
-Vec2<T>&& operator*(double f, const Vec2<T>& v)
+Vec2<division_type<double, T>>&& operator*(double f, const Vec2<T>& v)
 {
-    return v*f;
+    if(!can_multiply<double, T>)
+    {
+        throw "Error, impossible multiplication\n";
+    }
+
+    return Vec2<division_type<double, T>(f * v.x, f * v.y);
 }
 
 template<typename Lhs, typename Rhs>
@@ -503,22 +643,6 @@ Vec2<division_type<Lhs, Rhs>>&& operator*(const Vec2<Lhs>& v1, const Vec2<Rhs>& 
 
 
 // divisions
-
-template<typename T>
-Vec2<T>&& operator/(const Vec2<T>& v1, const Vec2<T>& v2)
-{
-    if(!can_divide<T, T>)
-    {
-        throw "Error, impossible division\n";
-    }
-
-    if (v2.x == 0 || v2.y == 0)
-    {
-        throw "Division by zero\n";
-    }
-
-    return Vec2<T>(v1.x / v2.x, v1.y / v2.y);
-}
 
 template<typename Lhs, typename Rhs>
 Vec2<division_type<Lhs, Rhs>>&& operator/(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
@@ -537,9 +661,6 @@ Vec2<division_type<Lhs, Rhs>>&& operator/(const Vec2<Lhs>& v1, const Vec2<Rhs>& 
 }
 
 
-
-
-
 // print operator Vec2
 template<typename Ty>
 std::ostream& operator<<(std::ostream& os, const Vec2<Ty>& obj) {
@@ -551,19 +672,87 @@ std::ostream& operator<<(std::ostream& os, const Vec2<Ty>& obj) {
 
 
 
+
+
+
+
+
+
 //////// Vector 3
 
+// additions
 
-template<typename Ty>
-Vec3<Ty>&& operator+(const Vec3<Ty>& v1, const Vec3<Ty>& v2)
+template<typename Lhs, typename Rhs>
+Vec3<addition_type<Lhs, Rhs>>&& operator+(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
 {
-    return Vec3<Ty>(v1.x + v2.x, v1.y + v2.y);
+    if(!can_add<Lhs, Rhs>)
+    {
+        throw "Error, impossible addition\n";
+    }
+
+    return Vec3<addition_type<Lhs, Rhs>>(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
 }
 
-template<typename Ty>
-Vec3<Ty>&& operator-(const Vec3<Ty>& v1, const Vec3<Ty>& v2)
+
+
+
+// substraction
+
+template<typename Lhs, typename Rhs>
+Vec3<substraction_type<Lhs, Rhs>>&& operator-(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
 {
-    return Vec3<Ty>(v1.x - v2.x, v1.y - v2.y);
+    if(!can_substract<Lhs, Rhs>)
+    {
+        throw "Error, impossible addition\n";
+    }
+
+    return Vec3<substraction_type<Lhs, Rhs>>(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
+}
+
+
+
+// multiplications
+
+template <typename T>
+Vec3<division_type<double, T>>&& operator*(double f, const Vec3<T>& v)
+{
+    if(!can_multiply<double, T>)
+    {
+        throw "Error, impossible multiplication\n";
+    }
+
+    return Vec3<division_type<double, T>(f * v.x, f * v.y, f * v.z);
+}
+
+template<typename Lhs, typename Rhs>
+Vec3<division_type<Lhs, Rhs>>&& operator*(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
+{
+    if(!can_multiply<Lhs, Rhs>)
+    {
+        throw "Error, impossible multiplication\n";
+    }
+
+    return Vec3<division_type<Lhs, Rhs>>(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
+}
+
+
+
+// divisions
+
+template<typename Lhs, typename Rhs>
+Vec3<division_type<Lhs, Rhs>>&& operator/(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
+{
+    if(!can_divide<Lhs, Rhs>)
+    {
+        throw "Error, impossible division\n";
+    }
+
+    if (v2.x == 0 || v2.y == 0 || v2.z == 0)
+    {
+        throw "Division by zero\n";
+    }
+
+    return Vec3<division_type<Lhs, Rhs>>(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
 }
 
 
