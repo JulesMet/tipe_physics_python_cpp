@@ -6,20 +6,36 @@
 #include "Vector.h"
 #include "Object.h"
 
-typedef long double ldouble;
-typedef unsigned int uint;
+//////////  Constants
 
-constexpr double G = 6.67e-11;
+/// @brief the constant of gravitation
+constexpr ldouble G = 6.67e-11;
+
+
+
+
+
+
+///////// Functions
 
 template <size_t nb_Iterations>
 Vec2<ldouble> AttractionForce(const Object<nb_Iterations>& source, const Object<nb_Iterations>& target)
 {
-    Vec2<ldouble> deplacement_vector = (source.GetCurrentPosition() - target.GetCurrentPosition()).Normalise();
+    constexpr Vec2<ldouble> deplacement_vector = source.GetCurrentPosition() - target.GetCurrentPosition();
+    constexpr Vec2<ldouble> force = (G * source.mass * target.mass / deplacement_vector.Magnitude_squared()) * deplacement_vector.Normalise();
 
-    // the force is error-proned : currently it only calculate with a double precision due to the magnitude
-    Vec2<ldouble> force = G;
+    return force;
 }
 
+
+
+
+
+
+
+
+
+////// Entry point
 
 #ifndef TESTS
 int main(int argc, char** argv) {

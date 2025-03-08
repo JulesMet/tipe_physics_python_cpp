@@ -4,11 +4,11 @@
 #include <array>
 #include <string>
 
-typedef unsigned int uint;
-typedef long double ldouble;
+using uint = unsigned int;
 
 template <size_t nb_Iterations>
 struct Object {
+public :
     ldouble mass;
 
     Object(ldouble _mass, Vec2<ldouble> initial_position, Vec2<ldouble> initial_velocity)

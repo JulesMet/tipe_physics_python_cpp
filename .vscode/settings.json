@@ -6,6 +6,7 @@
         "string": "cpp",
         "functional": "cpp",
         "iterator": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "iosfwd": "cpp"
     }
 }

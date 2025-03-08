@@ -7,6 +7,51 @@
 #include <functional>
 
 
+using ldouble = long double;
+
+
+
+
+
+////// stuff that I don't get currently but apparently I need it to make my type detector works
+
+
+namespace detail 
+{
+    template <class Default, class AlwaysVoid,
+            template<class...> class Op, class... Args>
+    struct detector 
+    {
+        using value_t = std::false_type;
+        using type = Default;
+    };
+
+    template <class Default, template<class...> class Op, class... Args>
+    struct detector<Default, std::void_t<Op<Args...>>, Op, Args...> 
+    {
+        using value_t = std::true_type;
+        using type = Op<Args...>;
+    }; 
+}
+    
+struct nonesuch { };
+ 
+template <template<class...> class Op, class... Args>
+using is_detected = typename detail::detector<nonesuch, void, Op, Args...>::value_t;
+ 
+template <template<class...> class Op, class... Args>
+using detected_t = typename detail::detector<nonesuch, void, Op, Args...>::type;
+ 
+template <class Default, template<class...> class Op, class... Args>
+using detected_or = detail::detector<Default, void, Op, Args...>;
+
+
+
+
+
+
+
+
 //
 // operations definitions
 //
@@ -58,17 +103,146 @@ constexpr bool can_divide_equal = is_detected<division_equal_type, Lhs, Rhs>::va
 
 
 template <class Lhs, class Rhs>
-constexpr bool can_add = is_detected<addition_type Lhs, Rhs>::value;
+constexpr bool can_add = is_detected<addition_type, Lhs, Rhs>::value;
 
 template <class Lhs, class Rhs>
-constexpr bool can_add_equal = is_detected<addition_equal_type Lhs, Rhs>::value;
+constexpr bool can_add_equal = is_detected<addition_equal_type, Lhs, Rhs>::value;
 
 
 template <class Lhs, class Rhs>
 constexpr bool can_substract = is_detected<substraction_type, Lhs, Rhs>::value;
 
 template <class Lhs, class Rhs>
-constexpr bool can_substract_equal = is_detected<substraction_equam_type, Lhs, Rhs>::value;
+constexpr bool can_substract_equal = is_detected<substraction_equal_type, Lhs, Rhs>::value;
+
+
+//////////// classes declaration
+template<typename t>
+class Vec2;
+
+template<typename t>
+class Vec3;
+
+
+
+//////////////////////////////////////////////////////////////
+//////////////////   Functions' signature   //////////////////
+//////////////////////////////////////////////////////////////
+
+
+
+/////// Vector 2
+
+// additions
+
+template<typename Lhs, typename Rhs>
+Vec2<addition_type<Lhs, Rhs>>&& operator+(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
+
+
+// substraction
+
+template<typename Lhs, typename Rhs>
+Vec2<substraction_type<Lhs, Rhs>>&& operator-(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
+
+
+
+// multiplications
+
+template <typename T>
+Vec2<division_type<ldouble, T>>&& operator*(ldouble f, const Vec2<T>& v);
+
+template<typename Lhs, typename Rhs>
+Vec2<division_type<Lhs, Rhs>>&& operator*(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
+
+
+
+// divisions
+
+template<typename Lhs, typename Rhs>
+Vec2<division_type<Lhs, Rhs>>&& operator/(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
+
+
+// print operator Vec2
+template<typename Ty>
+std::ostream& operator<<(std::ostream& os, const Vec2<Ty>& obj);
+
+
+/////// dot product
+
+template<typename Lhs, typename Rhs>
+ldouble dot(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
+
+
+
+/////// distance between 2 vector
+
+template<typename Lhs, typename Rhs>
+ldouble dist(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
+
+template<typename Lhs, typename Rhs>
+ldouble dist_square(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
+
+
+
+
+
+
+
+//////// Vector 3
+
+// additions
+
+template<typename Lhs, typename Rhs>
+Vec3<addition_type<Lhs, Rhs>>&& operator+(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2);
+
+
+// substraction
+
+template<typename Lhs, typename Rhs>
+Vec3<substraction_type<Lhs, Rhs>>&& operator-(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2);
+
+
+
+// multiplications
+
+template <typename T>
+Vec3<division_type<ldouble, T>>&& operator*(ldouble f, const Vec3<T>& v);
+
+template<typename Lhs, typename Rhs>
+Vec3<division_type<Lhs, Rhs>>&& operator*(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2);
+
+
+
+// divisions
+
+template<typename Lhs, typename Rhs>
+Vec3<division_type<Lhs, Rhs>>&& operator/(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2);
+
+
+// print operator Vec3
+template<typename Ty>
+std::ostream& operator<<(std::ostream& os, const Vec3<Ty>& obj);
+
+
+/////// dot product
+
+template<typename Lhs, typename Rhs>
+ldouble dot(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2);
+
+
+/////// distance between 2 vector
+
+template<typename Lhs, typename Rhs>
+ldouble dist(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2);
+
+template<typename Lhs, typename Rhs>
+ldouble dist_square(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2);
+
+
+
+
+
+
 
 
 
@@ -93,7 +267,7 @@ struct Vec2 {
 
     //////////////// Basic methods
 
-    double Magnitude() const
+    ldouble Magnitude() const
     {
         if(!can_multiply<T, T>)
         {
@@ -108,16 +282,31 @@ struct Vec2 {
         return sqrt(x*x + y*y);
     }
 
+    ldouble Magnitude_squared() const
+    {
+        if(!can_multiply<T, T>)
+        {
+            throw "Error, impossible multiplication\n";
+        }
+
+        if(!can_add<multiplication_type<T, T>, multiplication_type<T, T>>)
+        {
+            throw "Error, impossible addition\n";
+        }
+
+        return x*x + y*y;
+    }
+
 
     Vec2 Normalised() const
     {
-        double magnitude = Magnitude();
+        ldouble magnitude = Magnitude();
         if(magnitude == 0)
         {
             return *this;
         }
 
-        if(!can_divide<T, double>)
+        if(!can_divide<T, ldouble>)
         {
             throw "Error, impossible division\n";
         }        
@@ -127,13 +316,13 @@ struct Vec2 {
 
     Vec2 Normalise() const
     {
-        double magnitude = Magnitude();
+        ldouble magnitude = Magnitude();
         if(magnitude == 0)
         {
             return *this;
         }
 
-        if(!can_divide_equal<T, double>)
+        if(!can_divide_equal<T, ldouble>)
             throw "Error, impossible division\n";
 
         x /= magnitude;
@@ -202,19 +391,19 @@ struct Vec2 {
 
     /////////// scalar multiplication
 
-    Vec2<multiplication_type<T, double>>&& operator*(double f) const
+    Vec2<multiplication_type<T, ldouble>>&& operator*(ldouble f) const
     {
-        if(!can_multiply<double, T>)
+        if(!can_multiply<ldouble, T>)
         {
             throw "Error, impossible multiplication\n";
         }
 
-        return Vec2<multiplication_type<T, double>>(x * f, y * f);
+        return Vec2<multiplication_type<T, ldouble>>(x * f, y * f);
     }
 
-    void operator*=(double f)
+    void operator*=(ldouble f)
     {
-        if(!can_multiply_equal<T, double>)
+        if(!can_multiply_equal<T, ldouble>)
         {
             throw "Error, impossible multiplication\n";
         }
@@ -251,9 +440,9 @@ struct Vec2 {
 
     /////////// scalar division
 
-    Vec2<division_type<T, double>>&& operator/(double f) const
+    Vec2<division_type<T, ldouble>>&& operator/(ldouble f) const
     {
-        if(!can_divide<T, double>)
+        if(!can_divide<T, ldouble>)
         {
             throw "Error, impossible division\n";
         }
@@ -263,12 +452,12 @@ struct Vec2 {
             throw "Division by zero\n";
         }
 
-        return Vec2<division_type<T, double>>(x / f, y / f);
+        return Vec2<division_type<T, ldouble>>(x / f, y / f);
     }
 
-    void operator/=(double f)
+    void operator/=(ldouble f)
     {
-        if(!can_divide_equal<T, double>)
+        if(!can_divide_equal<T, ldouble>)
         {
             throw "Error, impossible division\n";
         }
@@ -357,7 +546,7 @@ struct Vec3 {
 
     //////////////// Basic methods
 
-    double Magnitude() const
+    ldouble Magnitude() const
     {
         if(!can_multiply<T, T>)
             throw "Error, impossible multiplication\n";
@@ -367,30 +556,40 @@ struct Vec3 {
         return sqrt(x*x + y*y + z*z);
     }
 
+    ldouble Magnitude_squared() const
+    {
+        if(!can_multiply<T, T>)
+            throw "Error, impossible multiplication\n";
+        if(!can_add<multiplication_type<T, T>, multiplication_type<T, T>>)
+            throw "Error, impossible addition\n";
+
+        return x*x + y*y + z*z;
+    }
+
 
     Vec3 Normalised() const
     {
-        double magnitude = Magnitude();
+        ldouble magnitude = Magnitude();
         if(magnitude == 0)
         {
             return *this;
         }
 
-        if(!can_divide<T, double>)
+        if(!can_divide<T, ldouble>)
             throw "Error, impossible division\n";
 
         return Vec3(x/magnitude, y/magnitude, z/magnitude);
     }
 
-    Vec3 Normalised() const
+    Vec3 Normalise() const
     {
-        double magnitude = Magnitude();
+        ldouble magnitude = Magnitude();
         if(magnitude == 0)
         {
             return *this;
         }
 
-        if(!can_divide_equal<T, double>)
+        if(!can_divide_equal<T, ldouble>)
             throw "Error, impossible division\n";
 
         x /= magnitude;
@@ -453,19 +652,19 @@ struct Vec3 {
 
     /////////// scalar multiplication
 
-    Vec3<multiplication_type<T, double>>&& operator*(double f) const
+    Vec3<multiplication_type<T, ldouble>>&& operator*(ldouble f) const
     {
-        if(!can_multiply<double, T>)
+        if(!can_multiply<ldouble, T>)
         {
             throw "Error, impossible multiplication\n";
         }
 
-        return Vec3<multiplication_type<T, double>>(x * f, y * f, z * f);
+        return Vec3<multiplication_type<T, ldouble>>(x * f, y * f, z * f);
     }
 
-    void operator*=(double f)
+    void operator*=(ldouble f)
     {
-        if(!can_multiply_equal<T, double>)
+        if(!can_multiply_equal<T, ldouble>)
         {
             throw "Error, impossible multiplication\n";
         }
@@ -504,9 +703,9 @@ struct Vec3 {
 
     /////////// scalar division
 
-    Vec3<division_type<T, double>>&& operator/(double f) const
+    Vec3<division_type<T, ldouble>>&& operator/(ldouble f) const
     {
-        if(!can_divide<T, double>)
+        if(!can_divide<T, ldouble>)
         {
             throw "Error, impossible division\n";
         }
@@ -516,12 +715,12 @@ struct Vec3 {
             throw "Division by zero\n";
         }
 
-        return Vec3<division_type<T, double>>(x / f, y / f, z / f);
+        return Vec3<division_type<T, ldouble>>(x / f, y / f, z / f);
     }
 
-    void operator/=(double f)
+    void operator/=(ldouble f)
     {
-        if(!can_divide<T, double>)
+        if(!can_divide<T, ldouble>)
         {
             throw "Error, impossible division\n";
         }
@@ -619,14 +818,14 @@ Vec2<substraction_type<Lhs, Rhs>>&& operator-(const Vec2<Lhs>& v1, const Vec2<Rh
 // multiplications
 
 template <typename T>
-Vec2<division_type<double, T>>&& operator*(double f, const Vec2<T>& v)
+Vec2<division_type<ldouble, T>>&& operator*(ldouble f, const Vec2<T>& v)
 {
-    if(!can_multiply<double, T>)
+    if(!can_multiply<ldouble, T>)
     {
         throw "Error, impossible multiplication\n";
     }
 
-    return Vec2<division_type<double, T>(f * v.x, f * v.y);
+    return Vec2<division_type<ldouble, T>>(f * v.x, f * v.y);
 }
 
 template<typename Lhs, typename Rhs>
@@ -668,7 +867,37 @@ std::ostream& operator<<(std::ostream& os, const Vec2<Ty>& obj) {
     return os;
 }
 
+/////// dot product
 
+template<typename Lhs, typename Rhs>
+ldouble dot(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
+{
+    if(!can_multiply<Lhs, Rhs>)
+        throw "Error, impossible multiplication\n";
+    if(!can_add<multiplication_type<Lhs, Rhs>, multiplication_type<Lhs, Rhs>>)
+        throw "Error, Impossible addition\n";
+
+    return v1.x * v2.x + v1.y * v2.y;
+}
+
+
+/////// distance between 2 vector
+
+template<typename Lhs, typename Rhs>
+ldouble dist(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
+{
+    constexpr Vec2<substraction_type<Lhs, Rhs>> deplacement_vector =  v2 - v1;
+
+    return deplacement_vector.Magnitude();
+}
+
+template<typename Lhs, typename Rhs>
+ldouble dist_square(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
+{
+    constexpr Vec2<substraction_type<Lhs, Rhs>> deplacement_vector =  v2 - v1;
+
+    return dot(deplacement_vector, deplacement_vector);
+}
 
 
 
@@ -714,14 +943,14 @@ Vec3<substraction_type<Lhs, Rhs>>&& operator-(const Vec3<Lhs>& v1, const Vec3<Rh
 // multiplications
 
 template <typename T>
-Vec3<division_type<double, T>>&& operator*(double f, const Vec3<T>& v)
+Vec3<division_type<ldouble, T>>&& operator*(ldouble f, const Vec3<T>& v)
 {
-    if(!can_multiply<double, T>)
+    if(!can_multiply<ldouble, T>)
     {
         throw "Error, impossible multiplication\n";
     }
 
-    return Vec3<division_type<double, T>(f * v.x, f * v.y, f * v.z);
+    return Vec3<division_type<ldouble, T>>(f * v.x, f * v.y, f * v.z);
 }
 
 template<typename Lhs, typename Rhs>
@@ -761,4 +990,37 @@ template<typename Ty>
 std::ostream& operator<<(std::ostream& os, const Vec3<Ty>& obj) {
     os << "(" << obj.x << ", " << obj.y << ", " << obj.z << ")";
     return os;
+}
+
+
+/////// dot product
+
+template<typename Lhs, typename Rhs>
+ldouble dot(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
+{
+    if(!can_multiply<Lhs, Rhs>)
+        throw "Error, impossible multiplication\n";
+    if(!can_add<multiplication_type<Lhs, Rhs>, multiplication_type<Lhs, Rhs>>)
+        throw "Error, Impossible addition\n";
+
+    return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+}
+
+
+/////// distance between 2 vector
+
+template<typename Lhs, typename Rhs>
+ldouble dist(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
+{
+    constexpr Vec3<substraction_type<Lhs, Rhs>> deplacement_vector =  v2 - v1;
+
+    return deplacement_vector.Magnitude();
+}
+
+template<typename Lhs, typename Rhs>
+ldouble dist_square(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
+{
+    constexpr Vec3<substraction_type<Lhs, Rhs>> deplacement_vector = v2 - v1;
+
+    return dot(deplacement_vector, deplacement_vector);
 }
