@@ -136,30 +136,30 @@ class Vec3;
 // additions
 
 template<typename Lhs, typename Rhs>
-Vec2<addition_type<Lhs, Rhs>>&& operator+(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
+Vec2<addition_type<Lhs, Rhs>> operator+(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
 
 
 // substraction
 
 template<typename Lhs, typename Rhs>
-Vec2<substraction_type<Lhs, Rhs>>&& operator-(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
+Vec2<substraction_type<Lhs, Rhs>> operator-(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
 
 
 
 // multiplications
 
 template <typename T>
-Vec2<division_type<ldouble, T>>&& operator*(ldouble f, const Vec2<T>& v);
+Vec2<division_type<ldouble, T>> operator*(ldouble f, const Vec2<T>& v);
 
 template<typename Lhs, typename Rhs>
-Vec2<division_type<Lhs, Rhs>>&& operator*(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
+Vec2<division_type<Lhs, Rhs>> operator*(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
 
 
 
 // divisions
 
 template<typename Lhs, typename Rhs>
-Vec2<division_type<Lhs, Rhs>>&& operator/(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
+Vec2<division_type<Lhs, Rhs>> operator/(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
 
 
 // print operator Vec2
@@ -193,30 +193,30 @@ ldouble dist_square(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2);
 // additions
 
 template<typename Lhs, typename Rhs>
-Vec3<addition_type<Lhs, Rhs>>&& operator+(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2);
+Vec3<addition_type<Lhs, Rhs>> operator+(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2);
 
 
 // substraction
 
 template<typename Lhs, typename Rhs>
-Vec3<substraction_type<Lhs, Rhs>>&& operator-(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2);
+Vec3<substraction_type<Lhs, Rhs>> operator-(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2);
 
 
 
 // multiplications
 
 template <typename T>
-Vec3<division_type<ldouble, T>>&& operator*(ldouble f, const Vec3<T>& v);
+Vec3<division_type<ldouble, T>> operator*(ldouble f, const Vec3<T>& v);
 
 template<typename Lhs, typename Rhs>
-Vec3<division_type<Lhs, Rhs>>&& operator*(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2);
+Vec3<division_type<Lhs, Rhs>> operator*(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2);
 
 
 
 // divisions
 
 template<typename Lhs, typename Rhs>
-Vec3<division_type<Lhs, Rhs>>&& operator/(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2);
+Vec3<division_type<Lhs, Rhs>> operator/(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2);
 
 
 // print operator Vec3
@@ -314,7 +314,7 @@ struct Vec2 {
         return Vec2(x/magnitude, y/magnitude);
     }
 
-    Vec2 Normalise() const
+    Vec2 Normalise()
     {
         ldouble magnitude = Magnitude();
         if(magnitude == 0)
@@ -344,7 +344,7 @@ struct Vec2 {
     /////////// add operators
 
     template <typename Ty>
-    Vec2<addition_type<T, Ty>>&& operator+(const Vec2<Ty>& other) const
+    Vec2<addition_type<T, Ty>> operator+(const Vec2<Ty>& other) const
     {
         if(!can_add<T, Ty>)
         {
@@ -355,8 +355,9 @@ struct Vec2 {
     }
 
     void operator+=(const Vec2& other) {
-        if(!can_add_equal<T, T>)
+        if(!can_add<T, T>)
         {
+            std::cout << "test\n";
             throw "Error, impossible addition\n";
         }
         x += other.x;
@@ -368,7 +369,7 @@ struct Vec2 {
     /////////// substract operator
 
     template <typename Ty>
-    Vec2<substraction_type<T, Ty>>&& operator-(const Vec2<Ty>& other) const
+    Vec2<substraction_type<T, Ty>> operator-(const Vec2<Ty>& other) const
     {
         if(!can_substract<T, Ty>)
         {
@@ -391,7 +392,7 @@ struct Vec2 {
 
     /////////// scalar multiplication
 
-    Vec2<multiplication_type<T, ldouble>>&& operator*(ldouble f) const
+    Vec2<multiplication_type<T, ldouble>> operator*(ldouble f) const
     {
         if(!can_multiply<ldouble, T>)
         {
@@ -415,7 +416,7 @@ struct Vec2 {
     /////////// vector-vector multiplication (component-wise)
 
     template <typename Ty>
-    Vec2<multiplication_type<T, Ty>>&& operator*(const Vec2<Ty>& other) const
+    Vec2<multiplication_type<T, Ty>> operator*(const Vec2<Ty>& other) const
     {
         if(!can_multiply<T, Ty>)
         {
@@ -440,7 +441,7 @@ struct Vec2 {
 
     /////////// scalar division
 
-    Vec2<division_type<T, ldouble>>&& operator/(ldouble f) const
+    Vec2<division_type<T, ldouble>> operator/(ldouble f) const
     {
         if(!can_divide<T, ldouble>)
         {
@@ -474,7 +475,7 @@ struct Vec2 {
     /////////// vector-vector division (component-wise)
 
     template <typename Ty>
-    Vec2<division_type<T, Ty>>&& operator/(const Vec2<Ty>& other) const
+    Vec2<division_type<T, Ty>> operator/(const Vec2<Ty>& other) const
     {
         if(!can_divide<T, Ty>)
         {
@@ -603,7 +604,7 @@ struct Vec3 {
     /////////// add operators
 
     template <typename Ty>
-    Vec3<addition_type<T, Ty>>&& operator+(const Vec3<Ty>& other) const
+    Vec3<addition_type<T, Ty>> operator+(const Vec3<Ty>& other) const
     {
         if(!can_add<T, Ty>)
         {
@@ -628,7 +629,7 @@ struct Vec3 {
     /////////// substract operator
 
     template <typename Ty>
-    Vec3<substraction_type<T, Ty>>&& operator-(const Vec3<Ty>& other) const
+    Vec3<substraction_type<T, Ty>> operator-(const Vec3<Ty>& other) const
     {
         if(!can_substract<T, Ty>)
         {
@@ -652,7 +653,7 @@ struct Vec3 {
 
     /////////// scalar multiplication
 
-    Vec3<multiplication_type<T, ldouble>>&& operator*(ldouble f) const
+    Vec3<multiplication_type<T, ldouble>> operator*(ldouble f) const
     {
         if(!can_multiply<ldouble, T>)
         {
@@ -677,7 +678,7 @@ struct Vec3 {
     /////////// vector-vector multiplication (component-wise)
 
     template <typename Ty>
-    Vec3<multiplication_type<T, Ty>>&& operator*(const Vec3<Ty>& other) const
+    Vec3<multiplication_type<T, Ty>> operator*(const Vec3<Ty>& other) const
     {
         if(!can_multiply<T, Ty>)
         {
@@ -703,7 +704,7 @@ struct Vec3 {
 
     /////////// scalar division
 
-    Vec3<division_type<T, ldouble>>&& operator/(ldouble f) const
+    Vec3<division_type<T, ldouble>> operator/(ldouble f) const
     {
         if(!can_divide<T, ldouble>)
         {
@@ -738,7 +739,7 @@ struct Vec3 {
     /////////// vector-vector division (component-wise)
 
     template <typename Ty>
-    Vec3<division_type<T, Ty>>&& operator*(const Vec3<Ty>& other) const
+    Vec3<division_type<T, Ty>> operator*(const Vec3<Ty>& other) const
     {
         if(!can_divide<T, Ty>)
         {
@@ -787,7 +788,7 @@ struct Vec3 {
 // additions
 
 template<typename Lhs, typename Rhs>
-Vec2<addition_type<Lhs, Rhs>>&& operator+(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
+Vec2<addition_type<Lhs, Rhs>> operator+(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
 {
     if(!can_add<Lhs, Rhs>)
     {
@@ -803,7 +804,7 @@ Vec2<addition_type<Lhs, Rhs>>&& operator+(const Vec2<Lhs>& v1, const Vec2<Rhs>& 
 // substraction
 
 template<typename Lhs, typename Rhs>
-Vec2<substraction_type<Lhs, Rhs>>&& operator-(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
+Vec2<substraction_type<Lhs, Rhs>> operator-(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
 {
     if(!can_substract<Lhs, Rhs>)
     {
@@ -818,7 +819,7 @@ Vec2<substraction_type<Lhs, Rhs>>&& operator-(const Vec2<Lhs>& v1, const Vec2<Rh
 // multiplications
 
 template <typename T>
-Vec2<division_type<ldouble, T>>&& operator*(ldouble f, const Vec2<T>& v)
+Vec2<division_type<ldouble, T>> operator*(ldouble f, const Vec2<T>& v)
 {
     if(!can_multiply<ldouble, T>)
     {
@@ -829,7 +830,7 @@ Vec2<division_type<ldouble, T>>&& operator*(ldouble f, const Vec2<T>& v)
 }
 
 template<typename Lhs, typename Rhs>
-Vec2<division_type<Lhs, Rhs>>&& operator*(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
+Vec2<division_type<Lhs, Rhs>> operator*(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
 {
     if(!can_multiply<Lhs, Rhs>)
     {
@@ -844,7 +845,7 @@ Vec2<division_type<Lhs, Rhs>>&& operator*(const Vec2<Lhs>& v1, const Vec2<Rhs>& 
 // divisions
 
 template<typename Lhs, typename Rhs>
-Vec2<division_type<Lhs, Rhs>>&& operator/(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
+Vec2<division_type<Lhs, Rhs>> operator/(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
 {
     if(!can_divide<Lhs, Rhs>)
     {
@@ -886,7 +887,7 @@ ldouble dot(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
 template<typename Lhs, typename Rhs>
 ldouble dist(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
 {
-    constexpr Vec2<substraction_type<Lhs, Rhs>> deplacement_vector =  v2 - v1;
+    const Vec2<substraction_type<Lhs, Rhs>> deplacement_vector =  v2 - v1;
 
     return deplacement_vector.Magnitude();
 }
@@ -894,7 +895,7 @@ ldouble dist(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
 template<typename Lhs, typename Rhs>
 ldouble dist_square(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
 {
-    constexpr Vec2<substraction_type<Lhs, Rhs>> deplacement_vector =  v2 - v1;
+    const Vec2<substraction_type<Lhs, Rhs>> deplacement_vector =  v2 - v1;
 
     return dot(deplacement_vector, deplacement_vector);
 }
@@ -912,7 +913,7 @@ ldouble dist_square(const Vec2<Lhs>& v1, const Vec2<Rhs>& v2)
 // additions
 
 template<typename Lhs, typename Rhs>
-Vec3<addition_type<Lhs, Rhs>>&& operator+(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
+Vec3<addition_type<Lhs, Rhs>> operator+(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
 {
     if(!can_add<Lhs, Rhs>)
     {
@@ -928,7 +929,7 @@ Vec3<addition_type<Lhs, Rhs>>&& operator+(const Vec3<Lhs>& v1, const Vec3<Rhs>& 
 // substraction
 
 template<typename Lhs, typename Rhs>
-Vec3<substraction_type<Lhs, Rhs>>&& operator-(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
+Vec3<substraction_type<Lhs, Rhs>> operator-(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
 {
     if(!can_substract<Lhs, Rhs>)
     {
@@ -943,7 +944,7 @@ Vec3<substraction_type<Lhs, Rhs>>&& operator-(const Vec3<Lhs>& v1, const Vec3<Rh
 // multiplications
 
 template <typename T>
-Vec3<division_type<ldouble, T>>&& operator*(ldouble f, const Vec3<T>& v)
+Vec3<division_type<ldouble, T>> operator*(ldouble f, const Vec3<T>& v)
 {
     if(!can_multiply<ldouble, T>)
     {
@@ -954,7 +955,7 @@ Vec3<division_type<ldouble, T>>&& operator*(ldouble f, const Vec3<T>& v)
 }
 
 template<typename Lhs, typename Rhs>
-Vec3<division_type<Lhs, Rhs>>&& operator*(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
+Vec3<division_type<Lhs, Rhs>> operator*(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
 {
     if(!can_multiply<Lhs, Rhs>)
     {
@@ -969,7 +970,7 @@ Vec3<division_type<Lhs, Rhs>>&& operator*(const Vec3<Lhs>& v1, const Vec3<Rhs>& 
 // divisions
 
 template<typename Lhs, typename Rhs>
-Vec3<division_type<Lhs, Rhs>>&& operator/(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
+Vec3<division_type<Lhs, Rhs>> operator/(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
 {
     if(!can_divide<Lhs, Rhs>)
     {
@@ -1012,7 +1013,7 @@ ldouble dot(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
 template<typename Lhs, typename Rhs>
 ldouble dist(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
 {
-    constexpr Vec3<substraction_type<Lhs, Rhs>> deplacement_vector =  v2 - v1;
+    const Vec3<substraction_type<Lhs, Rhs>> deplacement_vector =  v2 - v1;
 
     return deplacement_vector.Magnitude();
 }
@@ -1020,7 +1021,7 @@ ldouble dist(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
 template<typename Lhs, typename Rhs>
 ldouble dist_square(const Vec3<Lhs>& v1, const Vec3<Rhs>& v2)
 {
-    constexpr Vec3<substraction_type<Lhs, Rhs>> deplacement_vector = v2 - v1;
+    const Vec3<substraction_type<Lhs, Rhs>> deplacement_vector = v2 - v1;
 
     return dot(deplacement_vector, deplacement_vector);
 }

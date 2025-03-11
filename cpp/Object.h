@@ -1,29 +1,31 @@
 #pragma once
 
 #include "Vector.h"
-#include <array>
+#include <vector>
 #include <string>
 
 using uint = unsigned int;
 
-template <size_t nb_Iterations>
 struct Object {
 public :
     ldouble mass;
 
-    Object(ldouble _mass, Vec2<ldouble> initial_position, Vec2<ldouble> initial_velocity)
-        : mass(_mass)
+    Object(ldouble _mass, Vec2<ldouble> initial_position, Vec2<ldouble> initial_velocity, size_t nbIter)
+        : mass(_mass), nb_Iterations(nbIter)
     {
-        positions[0] = initial_position;
-        velocities[0] = initial_velocity;
+        positions.reserve(nbIter);
+        velocities.reserve(nbIter);
+
+        positions.emplace_back(initial_position);
+        velocities.emplace_back(initial_velocity);
     }
 
 
     Vec2<ldouble> GetCurrentPosition() const { return positions[m_Last_index]; }
-    Vec2<ldouble> GetCurrentSpeed() const { return positions[m_Last_index]; }
+    Vec2<ldouble> GetCurrentVelocity() const { return velocities[m_Last_index]; }
 
-    std::array<Vec2<ldouble>, nb_Iterations> GetPositionsArray() const { return positions; }
-    std::array<Vec2<ldouble>, nb_Iterations> GetVelocitiesArray() const { return velocities; }
+    std::vector<Vec2<ldouble>> GetPositionsArray() const { return positions; }
+    std::vector<Vec2<ldouble>> GetVelocitiesArray() const { return velocities; }
 
     void Update_state(Vec2<ldouble> position, Vec2<ldouble> velocity)
     {
@@ -31,9 +33,9 @@ public :
         if(m_Last_index > nb_Iterations - 1)
         {
             std::string error_message = std::string("Try accessing the ") +
-                                        std::string(m_Last_index + 1) +
+                                        std::to_string(m_Last_index + 1) +
                                         std::string("th element while this object size is ") +
-                                        std::string(m_Last_index) + std::string('\n');
+                                        std::to_string(m_Last_index) + std::to_string('\n');
             throw error_message.c_str();
             return;
         }
@@ -42,15 +44,16 @@ public :
         m_Last_index++;
 
         // update the position
-        positions[m_Last_index] = position;
+        positions.emplace_back(position);
 
         // update the velocity
-        velocities[m_Last_index] = velocity;
+        velocities.emplace_back(velocity);
     }
 
 private :
     size_t m_Last_index = 0;
+    const size_t nb_Iterations;
     
-    std::array<Vec2<ldouble>, nb_Iterations> positions;
-    std::array<Vec2<ldouble>, nb_Iterations> velocities;
+    std::vector<Vec2<ldouble>> positions;
+    std::vector<Vec2<ldouble>> velocities;
 };
